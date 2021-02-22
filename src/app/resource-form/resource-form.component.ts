@@ -1,5 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+export interface Resource {
+  id?: number;
+  name: string;
+  description: string;
+  lastEdit: Date;
+}
 
 @Component({
   selector: 'app-resource-form',
@@ -7,17 +14,25 @@ import {HttpClient} from '@angular/common/http';
   styleUrls: ['./resource-form.component.css']
 })
 export class ResourceFormComponent {
+  configUrl = 'http://localhost:8080/RM_v2/api/resource';
+  values: Array<Resource> = [];
+  response: string;
+  status: number;
 
-  public val: string;
-
-  constructor(http: HttpClient) {
-    console.log('test');
-    http.get('http://localhost:8080/RM_v2/api/resource').subscribe(
-      response => {
-        console.log(response);
-        this.val = JSON.stringify(response);
-      });
+  constructor(private http: HttpClient) {
+    http.get(this.configUrl).subscribe((res: Response) => {
+      this.status = res.status;
+      this.values = (JSON.parse(JSON.stringify(res)));
+    });
   }
 
-
+  delete(id) {
+    const url = `${this.configUrl}/${id}`;
+    this.http.delete(url).subscribe((res: Response) => {
+      this.status = res.status;
+      this.response = (JSON.parse(JSON.stringify(res)));
+      this.values.splice(id, 1);
+      console.log('deleting');
+    });
+  }
 }
